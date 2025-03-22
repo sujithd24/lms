@@ -1,0 +1,115 @@
+{
+    "questions": [
+      {
+        "id": 1,
+        "question": "What does MERN stack stand for in full-stack development?",
+        "options": [
+          "MongoDB, Express, React, Node.js",
+          "MySQL, Express, Redux, Node.js",
+          "MongoDB, Ember, React, Next.js",
+          "MariaDB, Express, React, Node.js"
+        ],
+        "correctAnswer": 0
+      },
+      {
+        "id": 2,
+        "question": "Which of the following is a popular front-end framework?",
+        "options": [
+          "Django",
+          "Spring Boot",
+          "React",
+          "Node.js"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 3,
+        "question": "Which database is commonly used in MEAN and MERN stack applications?",
+        "options": [
+          "PostgreSQL",
+          "MongoDB",
+          "MySQL",
+          "SQLite"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "What is the primary purpose of Express.js in a full-stack application?",
+        "options": [
+          "To manage the frontend UI",
+          "To serve as a backend framework for handling HTTP requests",
+          "To query relational databases",
+          "To provide styling capabilities"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "Which of the following is NOT a JavaScript runtime environment?",
+        "options": [
+          "Node.js",
+          "Deno",
+          "Browser",
+          "Apache"
+        ],
+        "correctAnswer": 3
+      },
+      {
+        "id": 6,
+        "question": "What is the role of Redux in a full-stack application?",
+        "options": [
+          "To manage global state in a frontend application",
+          "To connect the backend with the database",
+          "To define API routes",
+          "To provide authentication services"
+        ],
+        "correctAnswer": 0
+      },
+      {
+        "id": 7,
+        "question": "Which of these HTTP methods is used to update an existing resource?",
+        "options": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 8,
+        "question": "Which of the following is used to ensure secure authentication in a full-stack application?",
+        "options": [
+          "JWT (JSON Web Token)",
+          "Local Storage",
+          "Cookies only",
+          "Session Variables"
+        ],
+        "correctAnswer": 0
+      },
+      {
+        "id": 9,
+        "question": "What is an advantage of using GraphQL over REST APIs?",
+        "options": [
+          "GraphQL has better security than REST",
+          "GraphQL allows clients to request only the data they need",
+          "GraphQL does not require a backend",
+          "GraphQL is faster than REST in all scenarios"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "Which of these tools is commonly used for backend development in full-stack applications?",
+        "options": [
+          "Vue.js",
+          "Bootstrap",
+          "Flask",
+          "Tailwind CSS"
+        ],
+        "correctAnswer": 2
+      }
+    ]
+  }
+  
