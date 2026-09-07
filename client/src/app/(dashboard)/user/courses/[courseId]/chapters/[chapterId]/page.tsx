@@ -81,7 +81,7 @@ const Course = () => {
   };
 
   // Video Progress
-  const handleProgress = ({ played }) => {
+  const handleProgress = ({ played }: { played: number }) => {
     if (
       played >= 0.8 &&
       !hasMarkedComplete &&
@@ -149,13 +149,14 @@ const Course = () => {
 
         setCompilerOutput(result.data.stdout || result.data.stderr || "No output");
       }, 3000);
-    } catch (error) {
-      setCompilerOutput(`Error: ${error?.message}`);
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      setCompilerOutput(`Error: ${err?.message}`);
     }
   };
 
   // Quiz functions
-  const handleAnswerSelect = (questionId, answerIndex) => {
+  const handleAnswerSelect = (questionId: string, answerIndex: number) => {
     setSelectedAnswers({
       ...selectedAnswers,
       [questionId]: answerIndex,
