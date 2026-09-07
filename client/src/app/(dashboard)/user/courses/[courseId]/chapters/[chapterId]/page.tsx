@@ -177,14 +177,15 @@ const Course = () => {
 
   const submitQuiz = () => {
     if (!quizData?.questions) return;
+    const questions = quizData.questions;
     let correctAnswers = 0;
-    quizData.questions.forEach((question) => {
+    questions.forEach((question) => {
       if (selectedAnswers[question.id] === question.correctAnswer) {
         correctAnswers++;
       }
     });
 
-    const score = (correctAnswers / quizData.questions.length) * 100;
+    const score = (correctAnswers / questions.length) * 100;
     setQuizScore(score);
     setQuizSubmitted(true);
   };
