@@ -62,7 +62,7 @@ const Course = () => {
   }, [currentChapter]);
 
   // Function to fetch quiz data from the backend
-  const fetchQuizData = async (chapterId) => {
+  const fetchQuizData = async (chapterId: string) => {
     setQuizLoading(true);
     setQuizError(null);
     try {
