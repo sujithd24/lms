@@ -48,7 +48,7 @@ const Course = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("python");
   const [quizData, setQuizData] = useState(null);
   const [quizLoading, setQuizLoading] = useState(false);
-  const [quizError, setQuizError] = useState(null);
+  const [quizError, setQuizError] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
