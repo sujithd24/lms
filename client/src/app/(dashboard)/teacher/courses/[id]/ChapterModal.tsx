@@ -97,7 +97,7 @@ const ChapterModal = () => {
       chapterId: chapterId,
       title: data.title,
       content: data.content,
-      type: data.video ? "Video" : "Text",
+      type: (data.video ? "Video" : "Text") as "Text" | "Quiz" | "Video",
       video: data.video || "",
     };
 
