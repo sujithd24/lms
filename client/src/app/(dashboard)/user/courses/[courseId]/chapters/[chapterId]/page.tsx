@@ -176,9 +176,9 @@ const Course = () => {
   };
 
   const submitQuiz = () => {
-    // Calculate score
+    if (!quizData?.questions) return;
     let correctAnswers = 0;
-    quizData?.questions.forEach((question, index) => {
+    quizData.questions.forEach((question) => {
       if (selectedAnswers[question.id] === question.correctAnswer) {
         correctAnswers++;
       }
