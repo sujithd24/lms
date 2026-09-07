@@ -68,10 +68,11 @@ const Course = () => {
     try {
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/json/${chapterId}`);
       setQuizData(response.data.data);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching quiz data:", error);
+      const axiosError = error as { response?: { data?: { message?: string } } };
       setQuizError(
-        error.response?.data?.message || 
+        axiosError.response?.data?.message || 
         "Failed to load quiz for this chapter. Please try again later."
       );
     } finally {
