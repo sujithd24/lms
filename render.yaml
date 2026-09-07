@@ -4,14 +4,15 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: cd server && npm install && npm run build
-    startCommand: cd server && node dist/index.js
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 8001
+        value: 10000
       - key: AWS_REGION
         sync: false
       - key: AWS_ACCESS_KEY
@@ -26,7 +27,7 @@ services:
         sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
-      - key: CLERK_PUBLISHABLE_KEY
+      - key: ALLOWED_ORIGINS
         sync: false
 
   - type: web
@@ -34,8 +35,9 @@ services:
     runtime: node
     region: oregon
     plan: free
-    buildCommand: cd client && npm install && npm run build
-    startCommand: cd client && npx next start -p 3001
+    rootDir: client
+    buildCommand: npm install && npm run build
+    startCommand: npx next start -p $PORT
     envVars:
       - key: NODE_ENV
         value: production
@@ -46,4 +48,6 @@ services:
       - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
         sync: false
       - key: CLERK_SECRET_KEY
+        sync: false
+      - key: NEXT_PUBLIC_RAPIDAPI_KEY
         sync: false
