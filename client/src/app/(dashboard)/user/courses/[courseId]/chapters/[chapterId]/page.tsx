@@ -46,11 +46,11 @@ const Course = () => {
   const [compilerCode, setCompilerCode] = useState("");
   const [compilerOutput, setCompilerOutput] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("python");
-  const [quizData, setQuizData] = useState(null);
+  const [quizData, setQuizData] = useState<{ questions: { id: string; question: string; options: string[]; correctAnswer: number }[] } | null>(null);
   const [quizLoading, setQuizLoading] = useState(false);
   const [quizError, setQuizError] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
 
