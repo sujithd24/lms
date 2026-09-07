@@ -368,7 +368,6 @@ const Course = () => {
                             </h3>
                             
                             <RadioGroup 
-                              value={selectedAnswers[quizData.questions[currentQuestionIndex].id]?.toString()}
                               className="space-y-3"
                             >
                               {quizData.questions[currentQuestionIndex].options.map((option, optionIndex) => (
