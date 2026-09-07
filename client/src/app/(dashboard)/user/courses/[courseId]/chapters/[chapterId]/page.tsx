@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { CheckIcon, XIcon } from "lucide-react";
 
-const languageOptions = {
+const languageOptions: Record<string, number> = {
   c: 50,
   cpp: 54,
   python: 71,
