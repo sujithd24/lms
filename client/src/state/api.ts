@@ -170,6 +170,20 @@ export const api = createApi({
         method: "POST",
         body: transaction,
       }),
+      // A purchase enrolls the user, so refresh "My Courses" and counts
+      invalidatesTags: ["Courses", "UserCourseProgress"],
+    }),
+    enrollFree: build.mutation<
+      { courseProgress: UserCourseProgress },
+      { courseId: string; userId: string }
+    >({
+      query: (body) => ({
+        url: "transactions/free",
+        method: "POST",
+        body,
+      }),
+      // Refresh "My Courses" and enrollment counts immediately
+      invalidatesTags: ["Courses", "UserCourseProgress"],
     }),
 
     /* 
@@ -189,6 +203,18 @@ export const api = createApi({
       query: ({ userId, courseId }) =>
         `users/course-progress/${userId}/courses/${courseId}`,
       providesTags: ["UserCourseProgress"],
+    }),
+
+    unenrollCourse: build.mutation<
+      { courseId: string },
+      { userId: string; courseId: string }
+    >({
+      query: ({ userId, courseId }) => ({
+        url: `users/course-progress/${userId}/courses/${courseId}`,
+        method: "DELETE",
+      }),
+      // Refresh "My Courses", enrollment counts and progress
+      invalidatesTags: ["Courses", "UserCourseProgress"],
     }),
 
     updateUserCourseProgress: build.mutation<
@@ -244,7 +270,9 @@ export const {
   useGetTransactionsQuery,
   useCreateTransactionMutation,
   useCreateStripePaymentIntentMutation,
+  useEnrollFreeMutation,
   useGetUserEnrolledCoursesQuery,
   useGetUserCourseProgressQuery,
   useUpdateUserCourseProgressMutation,
+  useUnenrollCourseMutation,
 } = api;

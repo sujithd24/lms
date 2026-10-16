@@ -1,16 +1,13 @@
 "use client";
 
 import CoursePreview from "@/components/CoursePreview";
-import { CustomFormField } from "@/components/CustomFormField";
 import Loading from "@/components/Loading";
-import { Button } from "@/components/ui/button";
 import { useCurrentCourse } from "@/hooks/useCurrentCourse";
-import { GuestFormData, guestSchema } from "@/lib/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useCheckoutNavigation } from "@/hooks/useCheckoutNavigation";
 import { useSearchParams } from "next/navigation";
 import React from "react";
-import { Form } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { useClerk, useUser } from "@clerk/nextjs";
+import { ArrowRight, CreditCard, LockKeyhole, ShieldCheck } from "lucide-react";
 import SignUpComponent from "@/components/SignUp";
 import SignInComponent from "@/components/SignIn";
 
@@ -18,13 +15,9 @@ const CheckoutDetailsPage = () => {
   const { course: selectedCourse, isLoading, isError } = useCurrentCourse();
   const searchParams = useSearchParams();
   const showSignUp = searchParams.get("showSignUp") === "true";
-
-  const methods = useForm<GuestFormData>({
-    resolver: zodResolver(guestSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
+  const { user, isSignedIn } = useUser();
+  const { signOut } = useClerk();
+  const { navigateToStep } = useCheckoutNavigation();
 
   if (isLoading) return <Loading />;
   if (isError) return <div>Failed to fetch course data</div>;
@@ -37,45 +30,54 @@ const CheckoutDetailsPage = () => {
           <CoursePreview course={selectedCourse} />
         </div>
 
-        {/* STRETCH FEATURE */}
         <div className="checkout-details__options">
-          <div className="checkout-details__guest">
-            <h2 className="checkout-details__title">Guest Checkout</h2>
-            <p className="checkout-details__subtitle">
-              Enter email to receive course access details and order
-              confirmation. You can create an account after purchase.
-            </p>
-            <Form {...methods}>
-              <form
-                onSubmit={methods.handleSubmit((data) => {
-                  console.log(data);
-                })}
-                className="checkout-details__form"
+          {isSignedIn && user ? (
+            <div className="checkout-details__guest">
+              <div className="mx-auto mb-6 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-primary-500 to-secondary-500 text-white-100 shadow-glow">
+                <ShieldCheck className="h-7 w-7" />
+              </div>
+              <h2 className="checkout-details__title">Ready to checkout</h2>
+              <p className="checkout-details__subtitle">
+                Signed in as{" "}
+                <span className="font-medium text-white-100">
+                  {user.primaryEmailAddress?.emailAddress ?? user.username}
+                </span>
+                . The course will be added to your account after payment.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigateToStep(2)}
+                className="checkout-details__submit"
               >
-                <CustomFormField
-                  name="email"
-                  label="Email address"
-                  type="email"
-                  className="w-full rounded mt-4"
-                  labelClassName="font-normal text-white-50"
-                  inputClassName="py-3"
-                />
-                <Button type="submit" className="checkout-details__submit">
-                  Continue as Guest
-                </Button>
-              </form>
-            </Form>
-          </div>
-
-          <div className="checkout-details__divider">
-            <hr className="checkout-details__divider-line" />
-            <span className="checkout-details__divider-text">Or</span>
-            <hr className="checkout-details__divider-line" />
-          </div>
-
-          <div className="checkout-details__auth">
-            {showSignUp ? <SignUpComponent /> : <SignInComponent />}
-          </div>
+                <CreditCard className="h-4 w-4" /> Continue to payment
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <p className="flex items-center justify-center gap-2 text-xs text-customgreys-dirtyGrey">
+                <LockKeyhole className="h-3.5 w-3.5" /> Payments are processed
+                securely by Stripe
+              </p>
+              <button
+                type="button"
+                onClick={() => signOut({ redirectUrl: window.location.href })}
+                className="mx-auto mt-6 block text-xs text-primary-300 hover:text-primary-200"
+              >
+                Not you? Switch account
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="checkout-details__guest !py-8">
+                <h2 className="checkout-details__title">Sign in to continue</h2>
+                <p className="checkout-details__subtitle !mb-0">
+                  Your purchase is linked to your account so you can access the
+                  course and track your progress.
+                </p>
+              </div>
+              <div className="checkout-details__auth">
+                {showSignUp ? <SignUpComponent /> : <SignInComponent />}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -14,11 +14,14 @@ import {
 import {
   BookOpen,
   Briefcase,
+  Compass,
   DollarSign,
+  Home,
   LogOut,
   PanelLeft,
   Settings,
   User,
+  type LucideIcon,
 } from "lucide-react";
 import Loading from "./Loading";
 import Image from "next/image";
@@ -53,6 +56,50 @@ const AppSidebar = () => {
     (user.publicMetadata.userType as "student" | "teacher") || "student";
   const currentNavLinks = navLinks[userType];
 
+  // Public pages, reachable from the dashboard
+  const siteLinks = [
+    { icon: Home, label: "Home", href: "/" },
+    { icon: Compass, label: "Explore courses", href: "/search" },
+  ];
+
+  const renderLink = (link: { icon: LucideIcon; label: string; href: string }) => {
+    // "/" would prefix-match every route, so Home needs an exact match
+    const isActive =
+      link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+    return (
+      <SidebarMenuItem
+        key={link.href}
+        className={cn(
+          "app-sidebar__nav-item",
+          isActive && "app-sidebar__nav-item--active"
+        )}
+      >
+        <SidebarMenuButton
+          asChild
+          size="lg"
+          tooltip={link.label}
+          className={cn(
+            "app-sidebar__nav-button",
+            !isActive && "text-customgreys-dirtyGrey"
+          )}
+        >
+          <Link href={link.href} className="app-sidebar__nav-link" scroll={false}>
+            <link.icon className={isActive ? "text-white-50" : "text-gray-500"} />
+            <span
+              className={cn(
+                "app-sidebar__nav-text",
+                isActive ? "text-white-50" : "text-gray-500"
+              )}
+            >
+              {link.label}
+            </span>
+          </Link>
+        </SidebarMenuButton>
+        {isActive && <div className="app-sidebar__active-indicator" />}
+      </SidebarMenuItem>
+    );
+  };
+
   return (
     <Sidebar
       collapsible="icon"
@@ -86,46 +133,10 @@ const AppSidebar = () => {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu className="app-sidebar__nav-menu">
-          {currentNavLinks.map((link) => {
-            const isActive = pathname.startsWith(link.href);
-            return (
-              <SidebarMenuItem
-                key={link.href}
-                className={cn(
-                  "app-sidebar__nav-item",
-                  isActive && "bg-gray-800"
-                )}
-              >
-                <SidebarMenuButton
-                  asChild
-                  size="lg"
-                  className={cn(
-                    "app-sidebar__nav-button",
-                    !isActive && "text-customgreys-dirtyGrey"
-                  )}
-                >
-                  <Link
-                    href={link.href}
-                    className="app-sidebar__nav-link"
-                    scroll={false}
-                  >
-                    <link.icon
-                      className={isActive ? "text-white-50" : "text-gray-500"}
-                    />
-                    <span
-                      className={cn(
-                        "app-sidebar__nav-text",
-                        isActive ? "text-white-50" : "text-gray-500"
-                      )}
-                    >
-                      {link.label}
-                    </span>
-                  </Link>
-                </SidebarMenuButton>
-                {isActive && <div className="app-sidebar__active-indicator" />}
-              </SidebarMenuItem>
-            );
-          })}
+          <p className="app-sidebar__section-label">Browse</p>
+          {siteLinks.map(renderLink)}
+          <p className="app-sidebar__section-label">Dashboard</p>
+          {currentNavLinks.map(renderLink)}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

@@ -312,10 +312,10 @@ const Course = () => {
                             {quizData.questions.map((question, index) => (
                               <div 
                                 key={question.id} 
-                                className={`p-4 rounded-lg ${
-                                  selectedAnswers[question.id] === question.correctAnswer 
-                                    ? "bg-green-50" 
-                                    : "bg-red-50"
+                                className={`p-4 rounded-xl border ${
+                                  selectedAnswers[question.id] === question.correctAnswer
+                                    ? "bg-emerald-500/10 border-emerald-500/30"
+                                    : "bg-red-500/10 border-red-500/30"
                                 }`}
                               >
                                 <div className="flex items-start gap-2">
@@ -333,7 +333,7 @@ const Course = () => {
                                         Your answer: {question.options[selectedAnswers[question.id]]}
                                       </p>
                                       {selectedAnswers[question.id] !== question.correctAnswer && (
-                                        <p className="text-sm text-green-600">
+                                        <p className="text-sm text-emerald-400">
                                           Correct answer: {question.options[question.correctAnswer]}
                                         </p>
                                       )}

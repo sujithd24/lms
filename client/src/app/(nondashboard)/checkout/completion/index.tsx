@@ -27,8 +27,8 @@ const CompletionPage = () => {
         </p>
       </div>
       <div className="completion__action">
-        <Link href="user/courses" scroll={false}>
-          Go to Courses
+        <Link href="/user/courses" scroll={false}>
+          Go to my courses
         </Link>
       </div>
     </div>

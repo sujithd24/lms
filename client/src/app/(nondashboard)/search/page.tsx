@@ -1,52 +1,62 @@
 "use client";
 
 import Loading from "@/components/Loading";
-import { useGetCoursesQuery } from "@/state/api";
+import { useEnrollFreeMutation, useGetCoursesQuery } from "@/state/api";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import CourseCardSearch from "@/components/CourseCardSearch";
 import SelectedCourse from "./SelectedCourse";
-import axios from "axios";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 const Search = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const { data: courses, isLoading, isError } = useGetCoursesQuery({});
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  // Track the selection by id so it always reflects the latest fetched data
+  // (e.g. the enrollment list after enrolling).
+  const [selectedId, setSelectedId] = useState<string | null>(id);
   const router = useRouter();
-  const { user } = useUser();
-
-  useEffect(() => {
-    if (courses) {
-      if (id) {
-        const course = courses.find((c) => c.courseId === id);
-        setSelectedCourse(course || courses[0]);
-      } else {
-        setSelectedCourse(courses[0]);
-      }
-    }
-  }, [courses, id]);
+  const { user, isSignedIn } = useUser();
+  const [enrollFree, { isLoading: isEnrolling }] = useEnrollFreeMutation();
 
   if (isLoading) return <Loading />;
   if (isError || !courses) return <div>Failed to fetch courses</div>;
 
-  const handleCourseSelect = (course: Course) => {
-    setSelectedCourse(course);
-   
-  };
+  const selectedCourse =
+    courses.find((c) => c.courseId === selectedId) ?? courses[0] ?? null;
 
-  const handleEnrollNow = async(courseId: string) => {
-    try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/transactions/free`, {
-        courseId,
-        userId: user?.id,
-      });
-      router.push(`/`, {
+  const isEnrolled =
+    !!user &&
+    !!selectedCourse?.enrollments?.some((e) => e.userId === user.id);
+
+  const isPaid = (selectedCourse?.price ?? 0) > 0;
+
+  const handleEnrollNow = async (courseId: string) => {
+    if (isEnrolled) {
+      router.push("/user/courses", { scroll: false });
+      return;
+    }
+
+    // Paid courses go through the Stripe checkout wizard, which also
+    // handles sign-in for visitors who aren't logged in yet.
+    if (isPaid) {
+      router.push(`/checkout?step=1&id=${courseId}&showSignUp=false`, {
         scroll: false,
       });
+      return;
+    }
+
+    if (!isSignedIn || !user) {
+      router.push("/signin", { scroll: false });
+      return;
+    }
+
+    try {
+      await enrollFree({ courseId, userId: user.id }).unwrap();
+      router.push("/user/courses", { scroll: false });
     } catch (error) {
+      // The API layer already shows an error toast.
       console.error("Error enrolling in course:", error);
     }
   };
@@ -58,8 +68,10 @@ const Search = () => {
       transition={{ duration: 0.5 }}
       className="search"
     >
-      <h1 className="search__title">List of available courses</h1>
-      <h2 className="search__subtitle">{courses.length} courses avaiable</h2>
+      <h1 className="search__title">
+        Explore <span className="text-gradient">courses</span>
+      </h1>
+      <h2 className="search__subtitle">{courses.length} courses available</h2>
       <div className="search__content">
         <motion.div
           initial={{ y: 40, opacity: 0 }}
@@ -72,7 +84,7 @@ const Search = () => {
               key={course.courseId}
               course={course}
               isSelected={selectedCourse?.courseId === course.courseId}
-              onClick={() => handleCourseSelect(course)}
+              onClick={() => setSelectedId(course.courseId)}
             />
           ))}
         </motion.div>
@@ -87,6 +99,10 @@ const Search = () => {
             <SelectedCourse
               course={selectedCourse}
               handleEnrollNow={handleEnrollNow}
+              isEnrolled={isEnrolled}
+              isEnrolling={isEnrolling}
+              isSignedIn={!!isSignedIn}
+              isPaid={isPaid}
             />
           </motion.div>
         )}

@@ -103,6 +103,13 @@ export const createTransaction = async (
 ): Promise<void> => {
   const { userId, courseId, transactionId, amount, paymentProvider } = req.body;
 
+  if (!userId || !courseId || !transactionId) {
+    res
+      .status(400)
+      .json({ message: "User ID, course ID and transaction ID are required" });
+    return;
+  }
+
   try {
     // 1. get course info
     const course = await Course.get(courseId);
@@ -118,33 +125,42 @@ export const createTransaction = async (
     });
     await newTransaction.save();
 
-    // 3. create initial course progress
+    // 3. create initial course progress (keep existing progress if the
+    //    user was already enrolled, so a repeat purchase never resets it)
     if (course) {
-      const initialProgress = new UserCourseProgress({
-        userId,
-        courseId,
-        enrollmentDate: new Date().toISOString(),
-        overallProgress: 0,
-        sections: course.sections.map((section: any) => ({
-          sectionId: section.sectionId,
-          chapters: section.chapters.map((chapter: any) => ({
-            chapterId: chapter.chapterId,
-            completed: false,
+      const existingProgress = await UserCourseProgress.get({ userId, courseId });
+      if (!existingProgress) {
+        const initialProgress = new UserCourseProgress({
+          userId,
+          courseId,
+          enrollmentDate: new Date().toISOString(),
+          overallProgress: 0,
+          sections: (course.sections || []).map((section: any) => ({
+            sectionId: section.sectionId,
+            chapters: (section.chapters || []).map((chapter: any) => ({
+              chapterId: chapter.chapterId,
+              completed: false,
+            })),
           })),
-        })),
-        lastAccessedTimestamp: new Date().toISOString(),
-      });
-      await initialProgress.save();
+          lastAccessedTimestamp: new Date().toISOString(),
+        });
+        await initialProgress.save();
+      }
 
-      // 4. add enrollment to relevant course
-      await Course.update(
-        { courseId },
-        {
-          $ADD: {
-            enrollments: [{ userId }],
-          },
-        }
+      // 4. add enrollment to relevant course (skip if already listed)
+      const alreadyListed = (course.enrollments || []).some(
+        (e: any) => e.userId === userId
       );
+      if (!alreadyListed) {
+        await Course.update(
+          { courseId },
+          {
+            $ADD: {
+              enrollments: [{ userId }],
+            },
+          }
+        );
+      }
     }
 
     res.json({
@@ -167,19 +183,39 @@ export const createFreeTransaction = async (
 ): Promise<void> => {
   const { courseId , userId } = req.body;
 
+  if (!courseId || !userId) {
+    res.status(400).json({ message: "Course ID and user ID are required" });
+    return;
+  }
+
   try {
     // 1. get course info
     const course = await Course.get(courseId);
-   
+    if (!course) {
+      res.status(404).json({ message: "Course not found" });
+      return;
+    }
+
+    // 2. already enrolled: return existing progress instead of resetting it
+    //    and appending a duplicate enrollment
+    const existingProgress = await UserCourseProgress.get({ userId, courseId });
+    if (existingProgress) {
+      res.json({
+        message: "You're already enrolled in this course",
+        data: { courseProgress: existingProgress },
+      });
+      return;
+    }
+
     // 3. create initial course progress
     const initialProgress = new UserCourseProgress({
       userId,
       courseId,
       enrollmentDate: new Date().toISOString(),
       overallProgress: 0,
-      sections: course.sections.map((section: any) => ({
+      sections: (course.sections || []).map((section: any) => ({
         sectionId: section.sectionId,
-        chapters: section.chapters.map((chapter: any) => ({
+        chapters: (section.chapters || []).map((chapter: any) => ({
           chapterId: chapter.chapterId,
           completed: false,
         })),
@@ -188,18 +224,23 @@ export const createFreeTransaction = async (
     });
     await initialProgress.save();
 
-    // 4. add enrollment to relevant course
-    await Course.update(
-      { courseId },
-      {
-        $ADD: {
-          enrollments: [{ userId }],
-        },
-      }
+    // 4. add enrollment to relevant course (skip if already listed)
+    const alreadyListed = (course.enrollments || []).some(
+      (e: any) => e.userId === userId
     );
+    if (!alreadyListed) {
+      await Course.update(
+        { courseId },
+        {
+          $ADD: {
+            enrollments: [{ userId }],
+          },
+        }
+      );
+    }
 
     res.json({
-      message: "Purchased Course successfully",
+      message: "Enrolled successfully",
       data: {
         courseProgress: initialProgress,
       },

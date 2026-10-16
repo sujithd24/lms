@@ -1,5 +1,10 @@
-import React from "react";
-import StripeProvider from "./StripeProvider";
+import React, { useState } from "react";
+import type { PaymentIntent, StripeError } from "@stripe/stripe-js";
+import StripeProvider, {
+  isStripeTestMode,
+  useClientSecret,
+} from "./StripeProvider";
+import TestCardPanel from "./TestCardPanel";
 import {
   PaymentElement,
   useElements,
@@ -9,10 +14,11 @@ import { useCheckoutNavigation } from "@/hooks/useCheckoutNavigation";
 import { useCurrentCourse } from "@/hooks/useCurrentCourse";
 import { useClerk, useUser } from "@clerk/nextjs";
 import CoursePreview from "@/components/CoursePreview";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Loader2, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCreateTransactionMutation } from "@/state/api";
 import { toast } from "sonner";
+import { formatPrice } from "@/lib/utils";
 
 const PaymentPageContent = () => {
   const stripe = useStripe();
@@ -23,6 +29,51 @@ const PaymentPageContent = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
 
+  const clientSecret = useClientSecret();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Shared by the card form and the test-card button
+  const runPayment = async (
+    confirm: () => Promise<{
+      error?: StripeError;
+      paymentIntent?: PaymentIntent;
+    }>
+  ) => {
+    if (isProcessing) return; // guard against double submission
+    setIsProcessing(true);
+
+    try {
+      const result = await confirm();
+
+      if (result.error) {
+        // Card declined, invalid details, etc.
+        toast.error(result.error.message ?? "Payment failed. Please try again.");
+        return;
+      }
+
+      if (result.paymentIntent?.status === "succeeded") {
+        const transactionData: Partial<Transaction> = {
+          transactionId: result.paymentIntent.id,
+          userId: user?.id,
+          courseId: courseId,
+          paymentProvider: "stripe",
+          amount: course?.price || 0,
+        };
+
+        await createTransaction(transactionData).unwrap();
+        navigateToStep(3);
+      } else {
+        toast.error(
+          `Payment ${result.paymentIntent?.status ?? "was not completed"}. Please try again.`
+        );
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -31,31 +82,30 @@ const PaymentPageContent = () => {
       return;
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL
-      ? `http://${process.env.NEXT_PUBLIC_LOCAL_URL}`
-      : process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : undefined;
+    await runPayment(() =>
+      stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          // Only used if the payment method needs a redirect
+          return_url: `${window.location.origin}/checkout?step=3&id=${courseId}`,
+        },
+        redirect: "if_required",
+      })
+    );
+  };
 
-    const result = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${baseUrl}/checkout?step=3&id=${courseId}`,
-      },
-      redirect: "if_required",
-    });
-
-    if (result.paymentIntent?.status === "succeeded") {
-      const transactionData: Partial<Transaction> = {
-        transactionId: result.paymentIntent.id,
-        userId: user?.id,
-        courseId: courseId,
-        paymentProvider: "stripe",
-        amount: course?.price || 0,
-      };
-
-      await createTransaction(transactionData), navigateToStep(3);
+  // Test mode only: confirm with one of Stripe's built-in test cards
+  // (e.g. "pm_card_visa") instead of typing card details.
+  const payWithTestCard = async (testPaymentMethod: string) => {
+    if (!stripe || !clientSecret) {
+      toast.error("Stripe service is not available");
+      return;
     }
+    await runPayment(() =>
+      stripe.confirmCardPayment(clientSecret, {
+        payment_method: testPaymentMethod,
+      })
+    );
   };
 
   const handleSignOutAndNavigate = async () => {
@@ -99,6 +149,15 @@ const PaymentPageContent = () => {
                   </div>
                 </div>
               </div>
+
+              {isStripeTestMode && (
+                <TestCardPanel
+                  onPay={() => payWithTestCard("pm_card_visa")}
+                  onDecline={() => payWithTestCard("pm_card_chargeDeclined")}
+                  disabled={!stripe || !clientSecret || isProcessing}
+                  isProcessing={isProcessing}
+                />
+              )}
             </div>
           </form>
         </div>
@@ -119,9 +178,17 @@ const PaymentPageContent = () => {
           form="payment-form"
           type="submit"
           className="payment__submit"
-          disabled={!stripe || !elements}
+          disabled={!stripe || !elements || isProcessing}
         >
-          Pay with Credit Card
+          {isProcessing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Processing…
+            </>
+          ) : (
+            <>
+              <LockKeyhole className="h-4 w-4" /> Pay {formatPrice(course.price)}
+            </>
+          )}
         </Button>
       </div>
     </div>
