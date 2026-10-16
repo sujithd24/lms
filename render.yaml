@@ -51,3 +51,9 @@ services:
         sync: false
       - key: NEXT_PUBLIC_RAPIDAPI_KEY
         sync: false
+      # Demo login buttons on /signin and /signup (hidden when unset).
+      # NEXT_PUBLIC_* values are baked in at build time: redeploy after changing them.
+      - key: NEXT_PUBLIC_DEMO_STUDENT_PASSWORD
+        sync: false
+      - key: NEXT_PUBLIC_DEMO_TEACHER_PASSWORD
+        sync: false
