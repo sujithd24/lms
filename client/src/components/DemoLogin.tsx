@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ClipboardPaste, GraduationCap, Presentation } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,6 +27,9 @@ const DEMO_ACCOUNTS: Record<
     icon: Presentation,
   },
 };
+
+/** True when both demo passwords are configured (otherwise demo UI stays hidden). */
+export const hasDemoAccounts = Object.values(DEMO_ACCOUNTS).every((a) => a.password);
 
 const isVisible = (el: HTMLElement | null) =>
   !!el && el.offsetParent !== null && el.getAttribute("aria-hidden") !== "true";
@@ -80,8 +84,21 @@ const DemoLogin = () => {
     setFilled(null);
   }, [step]);
 
-  const hasPasswords = Object.values(DEMO_ACCOUNTS).every((a) => a.password);
-  if (!hasPasswords || step === "other") return null;
+  // `/signin?demo=student|teacher` (linked from the sign-up page) pre-fills that account once
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("demo");
+  const autoFilled = useRef(false);
+  useEffect(() => {
+    if (autoFilled.current || !hasDemoAccounts || step !== "identifier") return;
+    if (requested !== "student" && requested !== "teacher") return;
+    if (fillClerkInput("identifier", DEMO_ACCOUNTS[requested].email)) {
+      autoFilled.current = true;
+      setRole(requested);
+      setFilled("email");
+    }
+  }, [requested, step]);
+
+  if (!hasDemoAccounts || step === "other") return null;
 
   const handleRole = (selected: Role) => {
     setRole(selected);
