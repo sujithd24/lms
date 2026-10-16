@@ -164,6 +164,10 @@ declare global {
   interface SelectedCourseProps {
     course: Course;
     handleEnrollNow: (courseId: string) => void;
+    isEnrolled?: boolean;
+    isEnrolling?: boolean;
+    isSignedIn?: boolean;
+    isPaid?: boolean;
   }
 
   interface ToolbarProps {

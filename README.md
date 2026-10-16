@@ -203,12 +203,20 @@ npx next dev -p 3001
 
 Open **http://localhost:3001**
 
-### Demo Credentials
+### Demo Accounts
 
-| Role | Email | Password |
+The sign-in page has **Student** / **Teacher** buttons that fill in a demo account's
+email, and a **Paste password** button on the password step.
+
+| Role | Email | Clerk `publicMetadata.userType` |
 |------|-------|----------|
-| Student | student@demo.com | Student123! |
-| Teacher | teacher@demo.com | Teacher123! |
+| Student | student@demo.com | `student` |
+| Teacher | teacher@demo.com | `teacher` |
+
+1. Create both users in your Clerk instance with the role above (Clerk rejects
+   breached passwords such as `Student123!`, so pick unique ones).
+2. Put their passwords in `client/.env` as `NEXT_PUBLIC_DEMO_STUDENT_PASSWORD` and
+   `NEXT_PUBLIC_DEMO_TEACHER_PASSWORD`, then rebuild. The panel stays hidden until both are set.
 
 ---
 

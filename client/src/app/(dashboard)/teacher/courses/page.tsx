@@ -13,6 +13,7 @@ import {
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
+import { Stagger, StaggerItem } from "@/components/Motion";
 
 const Courses = () => {
   const router = useRouter();
@@ -87,17 +88,18 @@ const Courses = () => {
         onSearch={setSearchTerm}
         onCategoryChange={setSelectedCategory}
       />
-      <div className="teacher-courses__grid">
+      <Stagger className="teacher-courses__grid" stagger={0.07}>
         {filteredCourses.map((course) => (
-          <TeacherCourseCard
-            key={course.courseId}
-            course={course}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            isOwner={course.teacherId === user?.id}
-          />
+          <StaggerItem key={course.courseId}>
+            <TeacherCourseCard
+              course={course}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              isOwner={course.teacherId === user?.id}
+            />
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
     </div>
   );
 };

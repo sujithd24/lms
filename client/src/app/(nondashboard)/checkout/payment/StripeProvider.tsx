@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import {
   Appearance,
@@ -14,6 +14,14 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 }
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
+
+/** True only for Stripe test keys, so test-only helpers never appear in live mode. */
+export const isStripeTestMode =
+  process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY.startsWith("pk_test_");
+
+// Exposes the PaymentIntent client secret (e.g. for the test-card button).
+const ClientSecretContext = createContext<string>("");
+export const useClientSecret = () => useContext(ClientSecretContext);
 
 const appearance: Appearance = {
   theme: "stripe",
@@ -57,7 +65,9 @@ const StripeProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <Elements stripe={stripePromise} options={options} key={clientSecret}>
-      {children}
+      <ClientSecretContext.Provider value={clientSecret}>
+        {children}
+      </ClientSecretContext.Provider>
     </Elements>
   );
 };

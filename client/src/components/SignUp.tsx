@@ -20,14 +20,8 @@ const SignUpComponent = () => {
       return `/checkout?step=2&id=${courseId}&showSignUp=false`;
     }
 
-    const userType = user?.publicMetadata?.userType as string;
-    if ( userType === "teacher") {
-      return "/teacher/courses";
-    } else if ( userType === "student") {
-      return "/user/courses";
-    }
-
-    return "/";
+    // The user's role isn't known until after sign-up, so let /dashboard route by role.
+    return "/dashboard";
   }
 
   return (

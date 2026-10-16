@@ -2,7 +2,7 @@
 
 import { SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { Bell, BookOpen } from "lucide-react";
+import { Bell, BookOpen, Home } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -20,7 +20,17 @@ const Navbar = ({ isCoursePage }: { isCoursePage: boolean }) => {
             <SidebarTrigger className="dashboard-navbar__sidebar-trigger" />
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="dashboard-navbar__home"
+              scroll={false}
+              aria-label="Go to home page"
+              title="Home"
+            >
+              <Home className="h-4 w-4" />
+              <span className="hidden lg:inline">Home</span>
+            </Link>
             <div className="relative group">
               <Link
                 href="/search"
