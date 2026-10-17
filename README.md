@@ -158,8 +158,8 @@ NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_...
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 CLERK_SECRET_KEY=sk_...
 NEXT_PUBLIC_RAPIDAPI_KEY=your-rapidapi-key
-NEXT_PUBLIC_DEMO_STUDENT_PASSWORD="..."   # optional demo-login buttons (quote values containing #)
-NEXT_PUBLIC_DEMO_TEACHER_PASSWORD="..."
+DEMO_STUDENT_PASSWORD="..."   # optional demo-login buttons, read at runtime (quote values containing #)
+DEMO_TEACHER_PASSWORD="..."
 ```
 
 `NEXT_PUBLIC_*` values are baked in at build time: after changing them on Render,
@@ -220,8 +220,9 @@ email, and a **Paste password** button on the password step.
 
 1. Create both users in your Clerk instance with the role above (Clerk rejects
    breached passwords such as `Student123!`, so pick unique ones).
-2. Put their passwords in `client/.env` as `NEXT_PUBLIC_DEMO_STUDENT_PASSWORD` and
-   `NEXT_PUBLIC_DEMO_TEACHER_PASSWORD`, then rebuild. The panel stays hidden until both are set.
+2. Set their passwords as `DEMO_STUDENT_PASSWORD` and `DEMO_TEACHER_PASSWORD` in `client/.env`
+   (locally) or on the client service (Render). They are read at runtime, so a restart is
+   enough. The panel stays hidden until both are set.
 
 ---
 

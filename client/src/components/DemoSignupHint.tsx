@@ -3,11 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, GraduationCap, Presentation } from "lucide-react";
-import { hasDemoAccounts } from "./DemoLogin";
+import { useDemoAccounts } from "@/hooks/useDemoAccounts";
 
 /** On the sign-up page: skip registration and jump to a pre-filled demo sign-in. */
 const DemoSignupHint = () => {
-  if (!hasDemoAccounts) return null;
+  const { enabled } = useDemoAccounts();
+  if (!enabled) return null;
 
   return (
     <div className="glass w-full max-w-[400px] rounded-2xl p-5">
