@@ -33,17 +33,26 @@ app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",")
-  : ["http://localhost:3001", "http://localhost:3000"];
+// Tolerate common typos in the env value: spaces after commas, trailing slashes
+const normalizeOrigin = (o: string) => o.trim().replace(/\/+$/, "");
+const allowedOrigins = (
+  process.env.ALLOWED_ORIGINS || "http://localhost:3001,http://localhost:3000"
+)
+  .split(",")
+  .map(normalizeOrigin)
+  .filter(Boolean);
+
+console.log(`CORS allowed origins: ${allowedOrigins.join(", ")}`);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(normalizeOrigin(origin))) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        // No CORS headers instead of a 500 error page; the log says which origin to add
+        console.warn(`CORS blocked origin: ${origin} (add it to ALLOWED_ORIGINS)`);
+        callback(null, false);
       }
     },
     credentials: true,

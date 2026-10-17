@@ -5,31 +5,19 @@ import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ClipboardPaste, GraduationCap, Presentation } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDemoAccounts, type DemoRole } from "@/hooks/useDemoAccounts";
 
-type Role = "student" | "teacher";
+type Role = DemoRole;
 
-// Passwords come from env so they are not committed to the repo.
-// NEXT_PUBLIC_* values are inlined at build time; the panel hides itself if unset.
+// Passwords are not in the bundle: they are fetched from /api/demo-accounts at runtime,
+// and the panel hides itself when the host has no demo passwords configured.
 const DEMO_ACCOUNTS: Record<
   Role,
-  { label: string; email: string; password?: string; icon: typeof GraduationCap }
+  { label: string; email: string; icon: typeof GraduationCap }
 > = {
-  student: {
-    label: "Student",
-    email: "student@demo.com",
-    password: process.env.NEXT_PUBLIC_DEMO_STUDENT_PASSWORD,
-    icon: GraduationCap,
-  },
-  teacher: {
-    label: "Teacher",
-    email: "teacher@demo.com",
-    password: process.env.NEXT_PUBLIC_DEMO_TEACHER_PASSWORD,
-    icon: Presentation,
-  },
+  student: { label: "Student", email: "student@demo.com", icon: GraduationCap },
+  teacher: { label: "Teacher", email: "teacher@demo.com", icon: Presentation },
 };
-
-/** True when both demo passwords are configured (otherwise demo UI stays hidden). */
-export const hasDemoAccounts = Object.values(DEMO_ACCOUNTS).every((a) => a.password);
 
 const isVisible = (el: HTMLElement | null) =>
   !!el && el.offsetParent !== null && el.getAttribute("aria-hidden") !== "true";
@@ -67,6 +55,7 @@ const detectStep = (): "identifier" | "password" | "other" => {
 };
 
 const DemoLogin = () => {
+  const { enabled: hasDemoAccounts, passwords } = useDemoAccounts();
   const [role, setRole] = useState<Role | null>(null);
   const [step, setStep] = useState<"identifier" | "password" | "other">("identifier");
   const [filled, setFilled] = useState<"email" | "password" | null>(null);
@@ -96,7 +85,7 @@ const DemoLogin = () => {
       setRole(requested);
       setFilled("email");
     }
-  }, [requested, step]);
+  }, [requested, step, hasDemoAccounts]);
 
   if (!hasDemoAccounts || step === "other") return null;
 
@@ -108,8 +97,8 @@ const DemoLogin = () => {
   };
 
   const handlePassword = () => {
-    if (!role) return;
-    if (fillClerkInput("password", DEMO_ACCOUNTS[role].password!)) {
+    if (!role || !passwords) return;
+    if (fillClerkInput("password", passwords[role])) {
       setFilled("password");
     }
   };
