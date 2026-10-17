@@ -6,7 +6,11 @@
     "build": "rimraf dist && npx tsc && cpx \"src/seed/data/**/*\" dist/seed/data",
     "start": "npm run build && node dist/index.js",
     "dev": "npm run build && concurrently \"npx tsc -w\" \"nodemon --exec ts-node src/index.ts\"",
-    "seed": "ts-node src/seed/seedDynamodb.ts"
+    "seed": "ts-node src/seed/seed.ts",
+    "seed:reset": "ts-node src/seed/seed.ts --reset",
+    "migrate:dynamo": "ts-node src/seed/migrateFromDynamo.ts",
+    "migrate:quizzes": "ts-node src/seed/importDiskQuizzes.ts",
+    "quizzes:fill": "ts-node src/seed/fillQuizzes.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,7 +28,6 @@
     "clerk": "^0.8.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "dynamoose": "^4.0.3",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "helmet": "^8.0.0",

@@ -116,8 +116,11 @@ export const api = createApi({
         method: "PUT",
         body: formData,
       }),
+      // "Courses" (no id) also refreshes every course list (teacher dashboard,
+      // search, landing), so a publish/unpublish shows without a page refresh
       invalidatesTags: (result, error, { courseId }) => [
         { type: "Courses", id: courseId },
+        "Courses",
       ],
     }),
 

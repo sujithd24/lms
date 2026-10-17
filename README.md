@@ -1,6 +1,6 @@
 # LMS Platform - Learning Management System
 
-A full-stack Learning Management System built with Next.js 15, Express.js, TypeScript, and AWS DynamoDB. Features course creation, Stripe payments, Clerk authentication, video hosting, progress tracking, and more.
+A full-stack Learning Management System built with Next.js 15, Express.js, TypeScript, and MongoDB. Features course creation, Stripe payments, Clerk authentication, video hosting, progress tracking, and more.
 
 ---
 
@@ -36,7 +36,7 @@ A full-stack Learning Management System built with Next.js 15, Express.js, TypeS
 - **Stripe Integration**: Payment Intent with automatic payment methods
 - **3-Step Checkout Wizard**: Details → Payment → Confirmation
 - **Free Course Enrollment**: No payment required for free courses
-- **Transaction Recording**: All purchases logged in DynamoDB
+- **Transaction Recording**: All purchases logged in MongoDB
 - **Payment History**: Both students and teachers can view billing history
 - **Guest Checkout**: Available as a stretch feature
 
@@ -83,7 +83,7 @@ A full-stack Learning Management System built with Next.js 15, Express.js, TypeS
 | UI Components | shadcn/ui, Radix UI, Lucide Icons |
 | Authentication | Clerk (`@clerk/nextjs`, `@clerk/express`) |
 | Payments | Stripe (`stripe`, `@stripe/react-stripe-js`) |
-| Database | AWS DynamoDB (via Dynamoose ORM) |
+| Database | MongoDB Atlas (via Mongoose) |
 | File Storage | AWS S3 + CloudFront |
 | Backend | Express.js, TypeScript |
 | Compiler API | Judge0 CE (RapidAPI) |
@@ -109,7 +109,7 @@ lms/
 ├── server/                  # Express.js backend
 │   ├── src/
 │   │   ├── controllers/     # Route handlers
-│   │   ├── models/          # DynamoDB models (Dynamoose)
+│   │   ├── models/          # MongoDB models (Mongoose)
 │   │   ├── routes/          # API routes
 │   │   ├── seed/            # Database seed data
 │   │   └── utils/           # Utility functions
@@ -120,13 +120,16 @@ lms/
 
 ---
 
-## DynamoDB Tables
+## MongoDB Collections
 
-| Table | Hash Key | Range Key | Description |
-|-------|----------|-----------|-------------|
-| `Course` | `courseId` | - | Courses with sections, chapters, enrollments |
-| `Transaction` | `userId` | `transactionId` | Payment records |
-| `UserCourseProgress` | `userId` | `courseId` | Chapter completion tracking |
+| Collection | Unique key | Indexes | Description |
+|------------|------------|---------|-------------|
+| `courses` | `courseId` | `teacherId`, `category` | Courses with sections, chapters, enrollments |
+| `transactions` | `transactionId` | `userId`, `courseId` | Payment records |
+| `usercourseprogresses` | `userId` + `courseId` | `userId` | Chapter completion tracking |
+
+Models are defined with Mongoose in `server/src/models`. Host the database on
+[MongoDB Atlas](https://www.mongodb.com/atlas) (a free M0 cluster is enough).
 
 ---
 
@@ -136,6 +139,7 @@ lms/
 ```env
 PORT=8001
 NODE_ENV=production
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/lms?retryWrites=true&w=majority
 ALLOWED_ORIGINS=https://your-client.onrender.com
 AWS_REGION=us-east-1
 AWS_ACCESS_KEY=your-access-key
@@ -144,7 +148,7 @@ S3_BUCKET_NAME=your-bucket
 CLOUDFRONT_DOMAIN=https://your-domain.cloudfront.net
 CLERK_SECRET_KEY=sk_...
 STRIPE_SECRET_KEY=sk_...
-SEED_ON_START=true
+SEED_ON_START=true   # optional: loads sample courses only if the database is empty
 ```
 
 ### Client (`client/.env`)
@@ -154,7 +158,12 @@ NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_...
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
 CLERK_SECRET_KEY=sk_...
 NEXT_PUBLIC_RAPIDAPI_KEY=your-rapidapi-key
+NEXT_PUBLIC_DEMO_STUDENT_PASSWORD="..."   # optional demo-login buttons (quote values containing #)
+NEXT_PUBLIC_DEMO_TEACHER_PASSWORD="..."
 ```
+
+`NEXT_PUBLIC_*` values are baked in at build time: after changing them on Render,
+redeploy the client service.
 
 ---
 
@@ -162,8 +171,8 @@ NEXT_PUBLIC_RAPIDAPI_KEY=your-rapidapi-key
 
 ### Prerequisites
 - Node.js 18+
-- Java (for DynamoDB Local)
 - npm
+- MongoDB: a free MongoDB Atlas cluster, or a local MongoDB server on port 27017
 
 ### Setup
 
@@ -182,19 +191,15 @@ cd ../client && npm install
 ### Run Locally
 
 ```bash
-# 1. Start DynamoDB Local
-cd server
-java "-Djava.library.path=../dynamodb_local_latest/DynamoDBLocal_lib" \
-  -jar "../dynamodb_local_latest/DynamoDBLocal.jar" -port 8000
+# 1. Point the server at MongoDB: set MONGODB_URI in server/.env
+#    (leave it unset to use a local server at mongodb://127.0.0.1:27017/lms)
 
-# 2. Seed the database (new terminal)
+# 2. Load the sample data (only fills empty collections)
 cd server
-npm run build
-node dist/seed/seedDynamodb.js
+npm run seed            # or: npm run seed:reset  to wipe and reload
 
-# 3. Start the server (new terminal)
-cd server
-node dist/index.js
+# 3. Start the server
+npm run build && node dist/index.js
 
 # 4. Start the client (new terminal)
 cd client
@@ -271,7 +276,9 @@ The project includes seed data with:
 - **14 transactions**
 - **12 user course progress records**
 
-Run `cd server && npm run build && node dist/seed/seedDynamodb.js` to populate the database.
+Run `cd server && npm run seed` to populate an empty database (`npm run seed:reset` wipes it first).
+
+
 
 ---
 

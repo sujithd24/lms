@@ -1,0 +1,65 @@
+{
+  "Computer Science": [
+    { "id": 1, "question": "What is the time complexity of binary search on a sorted array?", "options": ["O(n)", "O(log n)", "O(n log n)", "O(1)"], "correctAnswer": 1 },
+    { "id": 2, "question": "Which data structure works on a First-In, First-Out basis?", "options": ["Stack", "Queue", "Tree", "Graph"], "correctAnswer": 1 },
+    { "id": 3, "question": "What does a compiler do?", "options": ["Runs code line by line", "Translates source code into machine code", "Stores data in memory", "Connects to the internet"], "correctAnswer": 1 },
+    { "id": 4, "question": "Which of these is NOT a primitive data type in most languages?", "options": ["Integer", "Boolean", "Array", "Character"], "correctAnswer": 2 },
+    { "id": 5, "question": "What is recursion?", "options": ["A loop that never ends", "A function that calls itself", "A type of variable", "A sorting algorithm"], "correctAnswer": 1 }
+  ],
+  "Artificial Intelligence": [
+    { "id": 1, "question": "What is machine learning?", "options": ["Hard-coding every rule by hand", "Systems that learn patterns from data", "A type of computer hardware", "A database query language"], "correctAnswer": 1 },
+    { "id": 2, "question": "Which type of learning uses labelled training data?", "options": ["Supervised learning", "Unsupervised learning", "Reinforcement learning", "Transfer learning"], "correctAnswer": 0 },
+    { "id": 3, "question": "What is a neural network loosely inspired by?", "options": ["The human brain", "Electrical circuits", "Spreadsheets", "The solar system"], "correctAnswer": 0 },
+    { "id": 4, "question": "What does 'overfitting' mean?", "options": ["The model is too simple", "The model memorises training data and generalises poorly", "The dataset is too large", "Training finished too quickly"], "correctAnswer": 1 },
+    { "id": 5, "question": "Which task is an example of natural language processing?", "options": ["Image cropping", "Translating text between languages", "Sorting numbers", "Compressing files"], "correctAnswer": 1 }
+  ],
+  "Web Development": [
+    { "id": 1, "question": "What does HTML stand for?", "options": ["HyperText Markup Language", "High Transfer Machine Language", "Hyperlink and Text Management Language", "Home Tool Markup Language"], "correctAnswer": 0 },
+    { "id": 2, "question": "Which language is mainly used to style web pages?", "options": ["Python", "CSS", "SQL", "Java"], "correctAnswer": 1 },
+    { "id": 3, "question": "Which keyword declares a variable that cannot be reassigned in JavaScript?", "options": ["var", "let", "const", "static"], "correctAnswer": 2 },
+    { "id": 4, "question": "Which HTTP method is typically used to create a new resource?", "options": ["GET", "POST", "DELETE", "HEAD"], "correctAnswer": 1 },
+    { "id": 5, "question": "In React, what stores data that changes over time inside a component?", "options": ["Props", "State", "Routes", "Styles"], "correctAnswer": 1 }
+  ],
+  "Data Science": [
+    { "id": 1, "question": "Which Python library is most widely used for working with tabular data?", "options": ["pandas", "Flask", "Django", "pytest"], "correctAnswer": 0 },
+    { "id": 2, "question": "What does the median of a dataset represent?", "options": ["The most frequent value", "The middle value when sorted", "The average of all values", "The largest value"], "correctAnswer": 1 },
+    { "id": 3, "question": "Which chart is best for showing a trend over time?", "options": ["Pie chart", "Line chart", "Scatter plot", "Histogram"], "correctAnswer": 1 },
+    { "id": 4, "question": "What is data cleaning?", "options": ["Deleting the whole dataset", "Fixing or removing incorrect and missing data", "Encrypting data", "Backing up data"], "correctAnswer": 1 },
+    { "id": 5, "question": "What does correlation measure?", "options": ["How two variables move together", "The size of a dataset", "The speed of a query", "The number of missing values"], "correctAnswer": 0 }
+  ],
+  "Mobile Development": [
+    { "id": 1, "question": "Which language is officially recommended for Android development?", "options": ["Swift", "Kotlin", "Ruby", "PHP"], "correctAnswer": 1 },
+    { "id": 2, "question": "Which language is used to build native iOS apps?", "options": ["Swift", "C#", "Go", "Perl"], "correctAnswer": 0 },
+    { "id": 3, "question": "What is React Native used for?", "options": ["Building native mobile apps with JavaScript", "Styling web pages", "Managing databases", "Testing APIs"], "correctAnswer": 0 },
+    { "id": 4, "question": "What does 'responsive design' make sure of?", "options": ["Apps load offline", "Layouts adapt to different screen sizes", "Code compiles faster", "Data is encrypted"], "correctAnswer": 1 },
+    { "id": 5, "question": "Where are mobile apps usually published for Android users?", "options": ["Google Play Store", "GitHub Pages", "npm", "Docker Hub"], "correctAnswer": 0 }
+  ],
+  "Cloud Computing": [
+    { "id": 1, "question": "What does IaaS stand for?", "options": ["Internet as a Service", "Infrastructure as a Service", "Integration as a Service", "Interface as a Service"], "correctAnswer": 1 },
+    { "id": 2, "question": "Which AWS service stores files as objects?", "options": ["EC2", "S3", "Lambda", "RDS"], "correctAnswer": 1 },
+    { "id": 3, "question": "What is serverless computing?", "options": ["Computing with no servers at all", "Running code without managing servers yourself", "Using only local machines", "A type of database"], "correctAnswer": 1 },
+    { "id": 4, "question": "What is the main benefit of auto-scaling?", "options": ["Capacity adjusts automatically to demand", "Code is written automatically", "Data is deleted automatically", "Passwords are reset"], "correctAnswer": 0 },
+    { "id": 5, "question": "What does a CDN do?", "options": ["Delivers content from servers close to users", "Compiles code", "Stores passwords", "Designs user interfaces"], "correctAnswer": 0 }
+  ],
+  "Cybersecurity": [
+    { "id": 1, "question": "What is phishing?", "options": ["Tricking people into revealing sensitive information", "Speeding up a network", "Backing up files", "Writing secure code"], "correctAnswer": 0 },
+    { "id": 2, "question": "What does two-factor authentication add?", "options": ["A second way to verify identity", "A second password field only", "Faster logins", "A backup email"], "correctAnswer": 0 },
+    { "id": 3, "question": "Which of these is the strongest password?", "options": ["password123", "Summer2024", "t7#Lq!9vZp2&", "qwerty"], "correctAnswer": 2 },
+    { "id": 4, "question": "What does HTTPS provide over HTTP?", "options": ["Encryption of data in transit", "Faster page loads only", "Bigger file uploads", "Free hosting"], "correctAnswer": 0 },
+    { "id": 5, "question": "What is a firewall used for?", "options": ["Filtering network traffic", "Cooling hardware", "Editing images", "Compressing files"], "correctAnswer": 0 }
+  ],
+  "Design": [
+    { "id": 1, "question": "What does UX stand for?", "options": ["User Experience", "Universal Exchange", "User Extension", "Unified Export"], "correctAnswer": 0 },
+    { "id": 2, "question": "What is a wireframe?", "options": ["A low-fidelity layout of a screen", "A finished visual design", "A type of font", "A colour palette"], "correctAnswer": 0 },
+    { "id": 3, "question": "Why is colour contrast important?", "options": ["It keeps text readable for everyone", "It makes files smaller", "It speeds up loading", "It is required by browsers"], "correctAnswer": 0 },
+    { "id": 4, "question": "What is visual hierarchy?", "options": ["Arranging elements to show their importance", "Sorting files into folders", "A company org chart", "A type of grid"], "correctAnswer": 0 },
+    { "id": 5, "question": "Which tool is widely used for interface design?", "options": ["Figma", "Excel", "Postman", "Docker"], "correctAnswer": 0 }
+  ],
+  "default": [
+    { "id": 1, "question": "What is the best way to remember what you learn?", "options": ["Practise and review regularly", "Read once quickly", "Skip the exercises", "Only watch videos"], "correctAnswer": 0 },
+    { "id": 2, "question": "What should you do when you get stuck on a lesson?", "options": ["Give up", "Re-watch, take notes and ask questions", "Skip to the end", "Guess the answers"], "correctAnswer": 1 },
+    { "id": 3, "question": "Why are short quizzes useful?", "options": ["They check understanding and reinforce memory", "They replace lessons", "They are only for grades", "They slow learning down"], "correctAnswer": 0 },
+    { "id": 4, "question": "What is a good habit when taking notes?", "options": ["Write key ideas in your own words", "Copy everything word for word", "Never review them", "Write nothing"], "correctAnswer": 0 },
+    { "id": 5, "question": "How can you apply what you learned in a course?", "options": ["Build a small project", "Forget it after the quiz", "Avoid practice", "Only memorise definitions"], "correctAnswer": 0 }
+  ]
+}

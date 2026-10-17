@@ -4,8 +4,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import * as dynamoose from "dynamoose";
-import seed from "./seed/seedDynamodb";
+import { connectDB } from "./db";
+import seed from "./seed/seed";
 import {
   createClerkClient,
   requireAuth,
@@ -19,10 +19,6 @@ import  jsonRoutes  from "./routes/jsonfile";
 
 /* CONFIGURATIONS */
 dotenv.config();
-const isProduction = process.env.NODE_ENV === "production";
-if (!isProduction) {
-  dynamoose.aws.ddb.local();
-}
 
 export const clerkClient = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
@@ -72,22 +68,29 @@ app.use("/api", jsonRoutes);
 /* SERVER */
 const port = process.env.PORT || 8001;
 
-// Seed on startup in production if no tables exist
-if (isProduction && process.env.SEED_ON_START === "true") {
-  seed().catch(console.error);
-}
-
 // Only listen when not in Lambda environment
 if (!process.env.AWS_LAMBDA_FUNCTION_NAME) {
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
+  connectDB()
+    .then(async () => {
+      // Optional: load sample data, but only into EMPTY collections (never wipes data)
+      if (process.env.SEED_ON_START === "true") {
+        await seed().catch((error) => console.error("Seeding failed:", error));
+      }
+      app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+      });
+    })
+    .catch((error) => {
+      console.error("Could not connect to MongoDB:", error.message);
+      process.exit(1);
+    });
 }
 
 // aws lambda production environment
 import serverless from "serverless-http";
 const serverlessApp = serverless(app);
 export const handler = async (event: any, context: any) => {
+  await connectDB(); // reused across warm invocations
   if (event.action === "seed") {
     await seed();
     return {
