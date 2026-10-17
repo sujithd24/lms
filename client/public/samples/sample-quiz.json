@@ -1,0 +1,39 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "What does HTML stand for?",
+      "options": [
+        "HyperText Markup Language",
+        "High Transfer Machine Language",
+        "Hyperlink and Text Management Language",
+        "Home Tool Markup Language"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 2,
+      "question": "Which language is mainly used to style web pages?",
+      "options": ["Python", "CSS", "SQL", "Java"],
+      "correctAnswer": 1
+    },
+    {
+      "id": 3,
+      "question": "Which keyword declares a block-scoped variable that cannot be reassigned in JavaScript?",
+      "options": ["var", "let", "const", "static"],
+      "correctAnswer": 2
+    },
+    {
+      "id": 4,
+      "question": "Which HTTP method is typically used to create a new resource in a REST API?",
+      "options": ["GET", "POST", "DELETE", "HEAD"],
+      "correctAnswer": 1
+    },
+    {
+      "id": 5,
+      "question": "In React, what is used to store data that changes over time inside a component?",
+      "options": ["Props", "State", "Routes", "Styles"],
+      "correctAnswer": 1
+    }
+  ]
+}

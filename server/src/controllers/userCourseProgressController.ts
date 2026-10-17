@@ -18,12 +18,10 @@ export const getUserEnrolledCourses = async (
   }
 
   try {
-    const enrolledCourses = await UserCourseProgress.query("userId")
-      .eq(userId)
-      .exec();
+    const enrolledCourses = await UserCourseProgress.find({ userId });
     const courseIds = enrolledCourses.map((item: any) => item.courseId);
-    // DynamoDB rejects a BatchGet with zero keys, so a new student would get a 500.
-    const courses = courseIds.length > 0 ? await Course.batchGet(courseIds) : [];
+    const courses =
+      courseIds.length > 0 ? await Course.find({ courseId: { $in: courseIds } }) : [];
     res.json({
       message: "Enrolled courses retrieved successfully",
       data: courses,
@@ -48,7 +46,7 @@ export const getUserCourseProgress = async (
   }
 
   try {
-    const progress = await UserCourseProgress.get({ userId, courseId });
+    const progress = await UserCourseProgress.findOne({ userId, courseId });
     if (!progress) {
       res
         .status(404)
@@ -80,7 +78,7 @@ export const updateUserCourseProgress = async (
   }
 
   try {
-    let progress = await UserCourseProgress.get({ userId, courseId });
+    let progress = await UserCourseProgress.findOne({ userId, courseId });
 
     if (!progress) {
       // If no progress exists, create initial progress
@@ -93,13 +91,15 @@ export const updateUserCourseProgress = async (
         lastAccessedTimestamp: new Date().toISOString(),
       });
     } else {
-      // Merge existing progress with new progress data
-      progress.sections = mergeSections(
-        progress.sections,
+      // Merge existing progress with new progress data. Work on plain objects:
+      // spreading Mongoose sub-documents would copy their internal fields.
+      const merged = mergeSections(
+        progress.toObject().sections ?? [],
         progressData.sections || []
       );
+      progress.set("sections", merged);
       progress.lastAccessedTimestamp = new Date().toISOString();
-      progress.overallProgress = calculateOverallProgress(progress.sections);
+      progress.overallProgress = calculateOverallProgress(merged);
     }
 
     await progress.save();
@@ -129,24 +129,18 @@ export const unenrollFromCourse = async (
   }
 
   try {
-    const progress = await UserCourseProgress.get({ userId, courseId });
+    const progress = await UserCourseProgress.findOne({ userId, courseId });
     if (!progress) {
       res.status(404).json({ message: "You are not enrolled in this course" });
       return;
     }
 
     // Remove the student's progress record
-    await UserCourseProgress.delete({ userId, courseId });
+    await UserCourseProgress.deleteOne({ userId, courseId });
 
     // Remove every enrollment entry for this user (also cleans up old duplicates).
     // Payment records are intentionally kept so billing history stays accurate.
-    const course = await Course.get(courseId);
-    if (course) {
-      const remaining = (course.enrollments || []).filter(
-        (e: any) => e.userId !== userId
-      );
-      await Course.update({ courseId }, { enrollments: remaining });
-    }
+    await Course.updateOne({ courseId }, { $pull: { enrollments: { userId } } });
 
     res.json({ message: "Unenrolled from course", data: { courseId } });
   } catch (error) {

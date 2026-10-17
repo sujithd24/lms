@@ -4,15 +4,25 @@ import AWS from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { getAuth } from "@clerk/express";
 
-const s3 = new AWS.S3();
+// Render's env uses AWS_ACCESS_KEY / AWS_SECRET_KEY; the SDK's default chain only
+// reads AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY, so pass them explicitly when set.
+const s3 = new AWS.S3({
+  region: process.env.AWS_REGION,
+  ...(process.env.AWS_ACCESS_KEY && process.env.AWS_SECRET_KEY
+    ? {
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_KEY,
+      }
+    : {}),
+});
 
 export const listCourses = async (req: Request, res: Response): Promise<void> => {
   const { category } = req.query;
   try {
     const courses =
       category && category !== "all"
-        ? await Course.scan("category").eq(category).exec()
-        : await Course.scan().exec();
+        ? await Course.find({ category: String(category) })
+        : await Course.find();
     res.json({ message: "Courses retrieved successfully", data: courses });
   } catch (error) {
     res.status(500).json({ message: "Error retrieving courses", error });
@@ -22,7 +32,7 @@ export const listCourses = async (req: Request, res: Response): Promise<void> =>
 export const getCourse = async (req: Request, res: Response): Promise<void> => {
   const { courseId } = req.params;
   try {
-    const course = await Course.get(courseId);
+    const course = await Course.findOne({ courseId });
     if (!course) {
       res.status(404).json({ message: "Course not found" });
       return;
@@ -71,7 +81,7 @@ export const updateCourse = async (req: Request, res: Response): Promise<void> =
   const updateData = { ...req.body };
   const { userId } = getAuth(req);
   try {
-    const course = await Course.get(courseId);
+    const course = await Course.findOne({ courseId });
     if (!course) {
       res.status(404).json({ message: "Course not found" });
       return;
@@ -111,10 +121,21 @@ export const updateCourse = async (req: Request, res: Response): Promise<void> =
       }));
     }
 
+    const previousStatus = course.status;
     Object.assign(course, updateData);
     await course.save();
 
-    res.json({ message: "Course updated successfully", data: course });
+    // Tell the teacher exactly what happened
+    const message =
+      course.status === "Published"
+        ? previousStatus === "Published"
+          ? "Changes saved"
+          : "Course published"
+        : previousStatus === "Published"
+          ? "Course unpublished"
+          : "Draft saved";
+
+    res.json({ message, data: course });
   } catch (error) {
     res.status(500).json({ message: "Error updating course", error });
   }
@@ -125,7 +146,7 @@ export const deleteCourse = async (req: Request, res: Response): Promise<void> =
   const { userId } = getAuth(req);
 
   try {
-    const course = await Course.get(courseId);
+    const course = await Course.findOne({ courseId });
     if (!course) {
       res.status(404).json({ message: "Course not found" });
       return;
@@ -136,7 +157,7 @@ export const deleteCourse = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    await Course.delete(courseId);
+    await Course.deleteOne({ courseId });
 
     res.json({ message: "Course deleted successfully", data: course });
   } catch (error) {

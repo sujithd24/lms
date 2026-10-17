@@ -1921,6 +1921,90 @@
   @apply space-y-5;
 }
 
+/* Course status badge in the course editor header */
+.course-status {
+  @apply inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em];
+}
+
+.course-status__dot {
+  @apply h-2 w-2 rounded-full bg-current;
+}
+
+.course-status--draft {
+  @apply bg-amber-400/10 text-amber-300;
+}
+
+.course-status--published {
+  @apply bg-emerald-500/15 text-emerald-300;
+}
+
+/* Empty sections panel in the course editor */
+.sections-empty {
+  @apply flex flex-col items-center rounded-xl border border-dashed border-white/10 px-6 py-10 text-center;
+}
+
+.sections-empty__icon {
+  @apply mb-4 grid h-12 w-12 place-items-center rounded-xl text-white-100 shadow-glow;
+  background: linear-gradient(135deg, #6366f1, #06b6d4);
+}
+
+.sections-empty__title {
+  @apply font-display text-lg font-semibold text-white-100;
+}
+
+.sections-empty__text {
+  @apply mt-1 max-w-sm text-sm text-customgreys-dirtyGrey;
+}
+
+.sections-empty__actions {
+  @apply mt-6 flex flex-wrap justify-center gap-3;
+}
+
+/* Upload fields in the chapter modal (video + quiz) */
+.upload-field {
+  @apply space-y-2 rounded-xl border border-white/[0.07] bg-white/[0.02] p-4;
+}
+
+.upload-field__head {
+  @apply flex flex-wrap items-center justify-between gap-2;
+}
+
+.upload-field__label {
+  @apply flex items-center gap-2 text-sm font-medium text-white-50;
+}
+
+.upload-field__sample {
+  @apply inline-flex items-center gap-1.5 text-xs font-medium text-primary-300 transition-colors hover:text-primary-200;
+}
+
+.upload-field__input {
+  @apply cursor-pointer border-none bg-customgreys-darkGrey py-2;
+}
+
+.upload-field__hint {
+  @apply text-xs leading-relaxed text-customgreys-dirtyGrey;
+}
+
+.upload-field__hint code {
+  @apply rounded bg-black/30 px-1 py-0.5 font-mono text-[11px] text-white-50;
+}
+
+.upload-field__status {
+  @apply flex items-start gap-2 rounded-lg px-3 py-2 text-xs;
+}
+
+.upload-field__status--ok {
+  @apply bg-emerald-500/10 text-emerald-300;
+}
+
+.upload-field__status--error {
+  @apply bg-red-500/10 text-red-300;
+}
+
+.upload-field__clear {
+  @apply ml-auto shrink-0 text-customgreys-dirtyGrey underline-offset-2 hover:text-red-300 hover:underline;
+}
+
 .chapter-modal__actions,
 .section-modal__actions {
   @apply mt-8 flex justify-end space-x-2;
@@ -1940,4 +2024,25 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Quiz answer cards (student chapter page) */
+.quiz-options {
+  @apply flex flex-col gap-2.5;
+}
+
+.quiz-option {
+  @apply flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white-50 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06];
+}
+
+.quiz-option--selected {
+  @apply border-primary-400/70 bg-primary-500/15 text-white-100 shadow-glow;
+}
+
+.quiz-option__letter {
+  @apply grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white/[0.06] text-xs font-semibold text-customgreys-dirtyGrey;
+}
+
+.quiz-option--selected .quiz-option__letter {
+  @apply bg-gradient-to-br from-primary-500 to-secondary-500 text-white-100;
 }

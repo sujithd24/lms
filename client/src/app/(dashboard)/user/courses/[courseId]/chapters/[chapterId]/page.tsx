@@ -12,8 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import Chatbot from "@/components/ChatBot";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { CheckIcon, XIcon } from "lucide-react";
 
 const languageOptions: Record<string, number> = {
@@ -54,12 +52,18 @@ const Course = () => {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
 
-  // Fetch quiz data when the current chapter changes
+  // Fetch quiz data when the current chapter changes, starting from a clean quiz
+  // (otherwise the previous chapter's questions and answers carry over)
   useEffect(() => {
+    setQuizData(null);
+    setSelectedAnswers({});
+    setCurrentQuestionIndex(0);
+    setQuizSubmitted(false);
+    setQuizScore(0);
     if (currentChapter?.chapterId) {
       fetchQuizData(currentChapter.chapterId);
     }
-  }, [currentChapter]);
+  }, [currentChapter?.chapterId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Function to fetch quiz data from the backend
   const fetchQuizData = async (chapterId: string) => {
@@ -367,20 +371,29 @@ const Course = () => {
                               {quizData.questions[currentQuestionIndex].question}
                             </h3>
                             
-                            <RadioGroup 
-                              className="space-y-3"
-                            >
-                              {quizData.questions[currentQuestionIndex].options.map((option, optionIndex) => (
-                                <div key={optionIndex} className="flex items-center space-x-2">
-                                  <RadioGroupItem 
-                                    id={`option-${optionIndex}`} 
-                                    value={optionIndex.toString()}
-                                    onClick={() => handleAnswerSelect(quizData.questions[currentQuestionIndex].id, optionIndex)}
-                                  />
-                                  <Label htmlFor={`option-${optionIndex}`}>{option}</Label>
-                                </div>
-                              ))}
-                            </RadioGroup>
+                            {/* Answer cards: the chosen one stays highlighted, also when moving back */}
+                            <div role="radiogroup" aria-label="Answers" className="quiz-options">
+                              {quizData.questions[currentQuestionIndex].options.map((option, optionIndex) => {
+                                const questionId = quizData.questions[currentQuestionIndex].id;
+                                const selected = selectedAnswers[questionId] === optionIndex;
+                                return (
+                                  <button
+                                    key={optionIndex}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={selected}
+                                    onClick={() => handleAnswerSelect(questionId, optionIndex)}
+                                    className={`quiz-option ${selected ? "quiz-option--selected" : ""}`}
+                                  >
+                                    <span className="quiz-option__letter">
+                                      {String.fromCharCode(65 + optionIndex)}
+                                    </span>
+                                    <span className="flex-1 text-left">{option}</span>
+                                    {selected && <CheckIcon className="h-4 w-4 text-primary-300" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
                           </div>
                           
                           <div className="flex justify-between">

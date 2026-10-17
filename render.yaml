@@ -13,6 +13,14 @@ services:
         value: production
       - key: PORT
         value: 10000
+      # MongoDB Atlas connection string (required), e.g.
+      # mongodb+srv://<user>:<password>@<cluster>.mongodb.net/lms?retryWrites=true&w=majority
+      - key: MONGODB_URI
+        sync: false
+      # "true" loads the sample courses, but only into an EMPTY database
+      - key: SEED_ON_START
+        sync: false
+      # AWS is now only used for S3 video uploads
       - key: AWS_REGION
         sync: false
       - key: AWS_ACCESS_KEY

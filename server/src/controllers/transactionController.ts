@@ -19,8 +19,8 @@ export const listTransactions = async (
 
   try {
     const transactions = userId
-      ? await Transaction.query("userId").eq(userId).exec()
-      : await Transaction.scan().exec();
+      ? await Transaction.find({ userId: String(userId) })
+      : await Transaction.find();
 
     res.json({
       message: "Transactions retrieved successfully",
@@ -38,17 +38,11 @@ export const listByIdTransactions = async (
   const { userId , courseId  } = req.query;
 
   try {
-    let query = Transaction.scan();
+    const filter: Record<string, string> = {};
+    if (userId) filter.userId = String(userId);
+    if (courseId) filter.courseId = String(courseId);
 
-    if (userId) {
-      query = query.where("userId").eq(userId);
-    }
-
-    if (courseId) {
-      query = query.where("courseId").eq(courseId);
-    }
-
-    const transactions = await query.exec();
+    const transactions = await Transaction.find(filter);
 
     res.json({
       message: "Transactions retrieved successfully",
@@ -112,7 +106,7 @@ export const createTransaction = async (
 
   try {
     // 1. get course info
-    const course = await Course.get(courseId);
+    const course = await Course.findOne({ courseId });
 
     // 2. create transaction record
     const newTransaction = new Transaction({
@@ -128,7 +122,7 @@ export const createTransaction = async (
     // 3. create initial course progress (keep existing progress if the
     //    user was already enrolled, so a repeat purchase never resets it)
     if (course) {
-      const existingProgress = await UserCourseProgress.get({ userId, courseId });
+      const existingProgress = await UserCourseProgress.findOne({ userId, courseId });
       if (!existingProgress) {
         const initialProgress = new UserCourseProgress({
           userId,
@@ -152,13 +146,10 @@ export const createTransaction = async (
         (e: any) => e.userId === userId
       );
       if (!alreadyListed) {
-        await Course.update(
+        // $addToSet never adds the same enrollment twice
+        await Course.updateOne(
           { courseId },
-          {
-            $ADD: {
-              enrollments: [{ userId }],
-            },
-          }
+          { $addToSet: { enrollments: { userId } } }
         );
       }
     }
@@ -190,7 +181,7 @@ export const createFreeTransaction = async (
 
   try {
     // 1. get course info
-    const course = await Course.get(courseId);
+    const course = await Course.findOne({ courseId });
     if (!course) {
       res.status(404).json({ message: "Course not found" });
       return;
@@ -198,7 +189,7 @@ export const createFreeTransaction = async (
 
     // 2. already enrolled: return existing progress instead of resetting it
     //    and appending a duplicate enrollment
-    const existingProgress = await UserCourseProgress.get({ userId, courseId });
+    const existingProgress = await UserCourseProgress.findOne({ userId, courseId });
     if (existingProgress) {
       res.json({
         message: "You're already enrolled in this course",
@@ -229,14 +220,11 @@ export const createFreeTransaction = async (
       (e: any) => e.userId === userId
     );
     if (!alreadyListed) {
-      await Course.update(
-        { courseId },
-        {
-          $ADD: {
-            enrollments: [{ userId }],
-          },
-        }
-      );
+      // $addToSet never adds the same enrollment twice
+        await Course.updateOne(
+          { courseId },
+          { $addToSet: { enrollments: { userId } } }
+        );
     }
 
     res.json({

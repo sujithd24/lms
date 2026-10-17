@@ -1,39 +1,20 @@
-import { Schema, model } from "dynamoose";
+import { Schema, model } from "mongoose";
+import { cleanJSON } from "../db";
 
 const transactionSchema = new Schema(
   {
-    userId: {
-      type: String,
-      hashKey: true,
-      required: true,
-    },
-    transactionId: {
-      type: String,
-      rangeKey: true,
-      required: true,
-    },
-    dateTime: {
-      type: String,
-      required: true,
-    },
-    courseId: {
-      type: String,
-      required: true,
-      index: {
-        name: "CourseTransactionsIndex",
-        type: "global",
-      },
-    },
-    paymentProvider: {
-      type: String,
-      enum: ["stripe"],
-      required: true,
-    },
+    userId: { type: String, required: true, index: true },
+    transactionId: { type: String, required: true, unique: true },
+    dateTime: { type: String, required: true },
+    courseId: { type: String, required: true, index: true },
+    paymentProvider: { type: String, enum: ["stripe"], required: true },
     amount: Number,
   },
   {
-    saveUnknown: true,
+    strict: false, // keep extra fields, as the previous schema did (saveUnknown)
     timestamps: true,
+    toJSON: cleanJSON,
+    toObject: cleanJSON,
   }
 );
 
